@@ -9,7 +9,7 @@ This is just a wrapper around other smart tools. [rhubarb-lip-sync](https://gith
 4. A plain text transcript of this speech
 
 ## Configuration
-Place the `rhubarb` executable for your system inside the `/rhubarb` directory and ensure the path to it in `app.js` is correct
+1. Place the `rhubarb` executable for your system inside the `/rhubarb` directory and ensure the path to it in `app.js` is correct
 2. (optional) add image sets to `data/img/<shape-name>/<shape>.jpg` – or use the built in ones (taken from rhubarb)
 
 ## Usage
