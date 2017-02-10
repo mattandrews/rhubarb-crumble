@@ -64,7 +64,8 @@ const generateVideo = function (err, fileExistedAlready) {
             console.log('4. Starting video encoding...');
             console.log(commandLine);
         }).on('stderr', function (stderrLine) {
-            console.log('4. Error encoding video', stderrLine);
+            // this captures all output, not just errors...
+            console.log('4. Encoding video:', stderrLine);
         }).on('end', function (stdout, stderr) {
             console.log('5. Finished! Video available at ' + argv.out);
         }).output(argv.out).run();
@@ -91,6 +92,10 @@ const parseMouthCues = function (mouthCues) {
 
     console.log('2. Converted mouth shapes to ffconcat commands');
     return commands.join("\n");
+};
+
+const makeVideo = function (cueData) {
+    writeDataToFile(concatOutputPath, parseMouthCues(cueData), generateVideo);
 };
 
 // have we already generated the shapes for ffmpeg?
@@ -121,7 +126,7 @@ if (!fs.existsSync(jsonOutputPath)) {
             // save json to file
             writeDataToFile(jsonOutputPath, JSON.stringify(json.mouthCues));
             // now generate video
-            writeDataToFile(concatOutputPath, parseMouthCues(json.mouthCues), generateVideo);
+            makeVideo(json.mouthCues)
         } else {
             console.error('1. Failed to find mouthCues data in JSON');
         }
@@ -131,5 +136,5 @@ if (!fs.existsSync(jsonOutputPath)) {
     let json = require(jsonOutputPath);
     // skip straight to video
     console.log('1-2. Skipping a few steps as this speech file has already been scanned.');
-    writeDataToFile(concatOutputPath, parseMouthCues(json), generateVideo);
+    makeVideo(json);
 }
