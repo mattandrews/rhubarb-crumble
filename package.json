@@ -1,0 +1,16 @@
+{
+  "name": "rhubarb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "convert.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.0",
+    "md5": "^2.2.1",
+    "yargs": "^6.6.0"
+  }
+}
