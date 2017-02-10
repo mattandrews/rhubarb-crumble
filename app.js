@@ -57,6 +57,7 @@ const generateVideo = function (err, fileExistedAlready) {
         .input(concatOutputPath)
         .audioCodec('aac')
         .videoCodec('libx264')
+        .outputOptions('-pix_fmt yuv420p')
         .size('1200x1200')
         .fps(25)
         .on('start', function (commandLine) {
