@@ -24,3 +24,11 @@ Specify a custom set of shape images:
 Skip the extended shapes (see rhubarb docs):
     
     node app.js -t speech.txt -s speech.wav -o out.mp4 --skipExtended
+
+## Electron
+
+Run `electron .` from the app root to test the output app
+
+To package for distribution, run:
+
+    electron-packager . --overwrite --no-prune --out packages --icon icon.icns
