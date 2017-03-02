@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RhubarbCrumble</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="photon/css/photon.min.css">
+    <style>
+        label {
+            font-weight: bold;
+        }
+        .is-hidden {
+            display: none;
+        }
+
+        .debugger {
+            padding: 10px;
+            height: 80%;
+            overflow: auto;
+            background-color: #eeeeee;
+        }
+
+        small {
+            display: block;
+        }
+
+        .btn-block {
+            display: block;
+        }
+
+        .filedata {
+            margin-top: 10px;
+            display: block;
+            color: #999999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="window">
+        <div class="window-content" id="js-loading">
+            <p>Fetching dependencies, please wait...</p>
+        </div>
+        <div class="window-content is-hidden" id="js-main">
+            <div class="pane-group">
+                <div class="pane padded-more">
+                    <h1>Rhubarb Crumble</h1>
+                    <p>A wrapper around <a href="https://github.com/DanielSWolf/rhubarb-lip-sync" target="_blank">Rhubarb Lip Sync</a> to convert audio into animated video.</p>
+                    <form>
+                        <div class="form-group">
+                            <label>Transcript text file (plain .txt)</label>
+                            <button class="btn btn-default btn-block js-file-picker" data-picker="transcript" id="js-transcript">Choose file</button>
+                            <span id="js-filename-transcript" class="filedata"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Speech audio file (.wav)</label>
+                            <button class="btn btn-default btn-block js-file-picker" data-picker="speech" id="js-speech">Choose file</button>
+                            <span id="js-filename-speech" class="filedata"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Output directory (for video file)</label>
+                            <button class="btn btn-default btn-block js-file-picker" data-picker="outputdir"
+                                    id="js-outputdir">Choose folder</button>
+                            <span id="js-filename-outputdir" class="filedata"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Video filename</label>
+                            <input type="text" class="form-control" value="out.mp4"  id="js-outputfile">
+                        </div>
+                        <div class="form-group">
+                            <label>Image set to use</label>
+                            <select class="form-control" id="js-imageset">
+                                <option value="pixel">Pixel face</option>
+                                <option value="lynsey">Lip images</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" checked id="js-shapes"> Use extended shapes?
+                                </label>
+                                <small>eg. only use basic shapes (looks worse!)</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="js-render">Render animation</button>
+                    </form>
+                </div>
+                <div class="pane padded-more">
+                    <h1>Output</h1>
+                    <ul id="js-debug" class="debugger"></ul>
+                </div>
+            </div>
+        </div>
+
+        <footer class="toolbar toolbar-footer">
+            <h1 class="title">&copy; 2017 &bull; Rhubarb Animated Face-o-tron 9000</h1>
+        </footer>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const {dialog} = require('electron').remote;
+
+        let ul = document.querySelector('#js-debug');
+
+        // init app when deps are loading
+        ipcRenderer.on('dependencies-ready', (event, arg) => {
+            let hiddenClass = 'is-hidden';
+            document.querySelector('#js-loading').classList.add(hiddenClass);
+            document.querySelector('#js-main').classList.remove(hiddenClass);
+        });
+
+        ipcRenderer.on('debug', (event, arg, msg, data) => {
+            let li = '<li><pre>' + arg + '</pre></li>';
+            let ulHTML = ul.innerHTML;
+            ul.innerHTML = ulHTML + li;
+            ul.scrollTop = 1E10;
+        });
+
+        document.querySelector('#js-render').addEventListener('click', (e) => {
+
+            e.preventDefault();
+
+            let fieldsToFetch = [
+                'transcript',
+                'speech',
+                'outputdir',
+                'outputfile',
+                'imageset',
+                'shapes'
+            ];
+
+            let data = {};
+            let validForm = true;
+
+            fieldsToFetch.forEach(field => {
+                let typeChecker = (field === 'shapes') ? 'checked' : 'value';
+                let v = document.querySelector('#js-' + field)[typeChecker];
+                if (!v && field !== 'shapes') {
+                    alert("Sorry - please make sure you provide a value for: " + field);
+                    validForm = false;
+                } else {
+                    data[field] = v;
+                }
+            });
+            if (validForm) {
+                ipcRenderer.send('render', data)
+            }
+        });
+
+        let pickers = document.querySelectorAll('.js-file-picker');
+
+        let pickerConfig = {
+            transcript: {
+                title: 'Transcript text file',
+                buttonLabel: 'Use transcript',
+                properties: ['openFile'],
+                filters: [
+                    {
+                        name: "Text files",
+                        extensions: ['txt', 'md']
+                    }
+                ]
+            },
+            speech: {
+                title: 'Speech audio file',
+                buttonLabel: 'Use audio',
+                properties: ['openFile'],
+                filters: [
+                    {
+                        name: "Audio file",
+                        extensions: ['wav', 'mp3']
+                    }
+                ]
+            },
+            outputdir: {
+                title: 'Video output location',
+                buttonLabel: 'Use this folder',
+                properties: ['openDirectory']
+            }
+        };
+
+        [].forEach.call(pickers, picker => {
+            picker.addEventListener('click', (e) => {
+                e.preventDefault();
+                let fieldName = picker.getAttribute('data-picker');
+                let config = pickerConfig[fieldName];
+                if (config) {
+                    let file = dialog.showOpenDialog(config);
+                    picker.value = file[0];
+                    document.querySelector('#js-filename-' + fieldName).textContent = file[0];
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

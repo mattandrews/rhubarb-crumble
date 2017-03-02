@@ -1,16 +1,22 @@
 {
-  "name": "rhubarb",
+  "name": "RhubarbCrumble",
+  "productName": "RhubarbCrumble",
   "version": "1.0.0",
-  "description": "",
-  "main": "convert.js",
+  "description": "Make animations like magic",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "electron-spawn": "^5.0.0",
+    "ffbinaries": "^0.1.6",
     "fluent-ffmpeg": "^2.1.0",
     "md5": "^2.2.1",
     "yargs": "^6.6.0"
+  },
+  "devDependencies": {
+    "electron": "^1.6.1"
   }
 }

@@ -5,3 +5,4 @@ data/*.json
 data/*.ffconcat
 rhubarb/*
 assets
+binaries
