@@ -1,3 +1,4 @@
+'use strict';
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
@@ -38,7 +39,7 @@ const getBinaries = function () {
 };
 
 function getWindow(windowName) {
-    for (var i = 0; i < windows.length; i++) {
+    for (let i = 0; i < windows.length; i++) {
         if (windows[i].name == windowName) {
             return windows[i].window;
         }
@@ -48,7 +49,7 @@ function getWindow(windowName) {
 
 function createWindow () {
     // Create the browser window.
-    let win = new BrowserWindow({ width: 900, height: 700 });
+    let win = new BrowserWindow({ width: 900, height: 800 });
 
     // and load the index.html of the app.
     win.loadURL(url.format({
@@ -65,7 +66,7 @@ function createWindow () {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
-        win = null
+        win = null;
     });
 
     windows.push({
@@ -111,6 +112,8 @@ ipcMain.on('render', (event, data) => {
         skipExtended: data.shapes
     };
 
+    if (data.imgdir) { renderData.imgdir = data.imgdir; }
+    
     generator.init(renderData, function (msg, data) {
         event.sender.send('debug', msg, data)
     });

@@ -24,6 +24,10 @@ const argv = require('yargs')
     .alias('i', 'imgset')
     .describe('i', 'Image set to use')
     .default('i', 'pixel')
+    // image folder
+    .alias('d', 'imgdir')
+    .describe('d', 'Directory of image set to use')
+    .default('d', false)
     // skip extended shapes
     .alias('skip', 'skipExtended')
     .describe('skip', 'Skip extended shapes')

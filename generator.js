@@ -47,6 +47,7 @@ const init = function (argv, customLoggerOption) {
             .audioCodec('aac')
             .videoCodec('libx264')
             .outputOptions('-pix_fmt yuv420p')
+            .inputOptions('-safe 0')
             .size('1200x1200')
             .fps(25)
             .on('start', function (commandLine) {
@@ -70,7 +71,8 @@ const init = function (argv, customLoggerOption) {
         let commands = ['ffconcat version 1.0'];
 
         const getImg = function (shape) {
-            return 'img/' + argv.imgset + '/' + shape + '.jpg';
+            let path = (argv.imgdir) ? argv.imgdir : 'img/' + argv.imgset;
+            return path + '/' + shape + '.jpg';
         };
 
         mouthCues.forEach(function (cue) {

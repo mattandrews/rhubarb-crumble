@@ -46,36 +46,57 @@
                 <div class="pane padded-more">
                     <h1>Rhubarb Crumble</h1>
                     <p>A wrapper around <a href="https://github.com/DanielSWolf/rhubarb-lip-sync" target="_blank">Rhubarb Lip Sync</a> to convert audio into animated video.</p>
+
                     <form>
+
                         <div class="form-group">
                             <label>Transcript text file (plain .txt)</label>
                             <button class="btn btn-default btn-block js-file-picker" data-picker="transcript" id="js-transcript">Choose file</button>
                             <span id="js-filename-transcript" class="filedata"></span>
                         </div>
+
                         <div class="form-group">
                             <label>Speech audio file (.wav)</label>
                             <button class="btn btn-default btn-block js-file-picker" data-picker="speech" id="js-speech">Choose file</button>
                             <span id="js-filename-speech" class="filedata"></span>
                         </div>
+
                         <div class="form-group">
                             <label>Output directory (for video file)</label>
                             <button class="btn btn-default btn-block js-file-picker" data-picker="outputdir"
                                     id="js-outputdir">Choose folder</button>
                             <span id="js-filename-outputdir" class="filedata"></span>
                         </div>
+
                         <div class="form-group">
                             <label>Video filename</label>
                             <input type="text" class="form-control" value="out.mp4"  id="js-outputfile">
                         </div>
+
                         <div class="form-group">
                             <label>Image set to use</label>
                             <select class="form-control" id="js-imageset">
                                 <option value="pixel">Pixel face</option>
                                 <option value="lynsey">Lip images</option>
                             </select>
-                        </div>
-                        <div class="form-group">
                             <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="js-custom-images"> Use your own images instead?
+                                </label>
+                            </div>
+                            <div class="form-group is-hidden" id="js-custom-image-picker">
+                                <label>Custom lip image folder</label>
+                                <button class="btn btn-default btn-block js-file-picker" data-picker="imgdir"
+                                        id="js-imgdir">Choose folder</button>
+                                <span id="js-filename-imgdir" class="filedata"></span>
+                                <small>This directory should have a set of images with filenames 'A.jpg', 'B.jpg'
+                                (covering A, B, C, D, E, F, G at a minimum, and H and X if using extended shapes - see below)</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Shape configuration</label>
+                            <div class="checkbox" style="margin-top: 0;">
                                 <label>
                                     <input type="checkbox" checked id="js-shapes"> Use extended shapes?
                                 </label>
@@ -83,7 +104,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" id="js-render">Render animation</button>
+                        <button type="submit" class="btn btn-primary btn-large" id="js-render">Render animation</button>
                     </form>
                 </div>
                 <div class="pane padded-more">
@@ -103,10 +124,13 @@
         const {dialog} = require('electron').remote;
 
         let ul = document.querySelector('#js-debug');
+        let hiddenClass = 'is-hidden';
+
+        let toggleCustomImageCheckbox = document.querySelector('#js-custom-images');
+        let imagePickerUI = document.querySelector('#js-custom-image-picker');
 
         // init app when deps are loading
         ipcRenderer.on('dependencies-ready', (event, arg) => {
-            let hiddenClass = 'is-hidden';
             document.querySelector('#js-loading').classList.add(hiddenClass);
             document.querySelector('#js-main').classList.remove(hiddenClass);
         });
@@ -128,7 +152,8 @@
                 'outputdir',
                 'outputfile',
                 'imageset',
-                'shapes'
+                'imgdir',
+                'shapes',
             ];
 
             let data = {};
@@ -137,13 +162,19 @@
             fieldsToFetch.forEach(field => {
                 let typeChecker = (field === 'shapes') ? 'checked' : 'value';
                 let v = document.querySelector('#js-' + field)[typeChecker];
-                if (!v && field !== 'shapes') {
+                if (!v && field !== 'shapes' && field !== 'imgdir') {
                     alert("Sorry - please make sure you provide a value for: " + field);
                     validForm = false;
                 } else {
                     data[field] = v;
                 }
             });
+
+            // don't send an image dir if we uncheck it
+            if (!toggleCustomImageCheckbox.checked) {
+                delete data.imgdir;
+            }
+
             if (validForm) {
                 ipcRenderer.send('render', data)
             }
@@ -178,6 +209,11 @@
                 title: 'Video output location',
                 buttonLabel: 'Use this folder',
                 properties: ['openDirectory']
+            },
+            imgdir: {
+                title: 'Custom lip image folder location',
+                buttonLabel: 'Use this folder',
+                properties: ['openDirectory']
             }
         };
 
@@ -192,6 +228,12 @@
                     document.querySelector('#js-filename-' + fieldName).textContent = file[0];
                 }
             });
+        });
+
+
+
+        toggleCustomImageCheckbox.addEventListener('click', () => {
+            imagePickerUI.classList.toggle(hiddenClass);
         });
 
     </script>
